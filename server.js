@@ -3,13 +3,13 @@ const puppeteer = require("puppeteer");
 
 const app = express();
 
-app.get("/", (req,res)=>{
-res.send("VCB API is running");
+app.get("/", (req, res) => {
+  res.send("VCB Puppeteer API is running");
 });
 
 app.get("/vcb", async (req, res) => {
 
-try{
+try {
 
 const browser = await puppeteer.launch({
 args: ['--no-sandbox','--disable-setuid-sandbox'],
@@ -32,14 +32,11 @@ const rows=document.querySelectorAll("table tbody tr");
 let result=[];
 
 rows.forEach(r=>{
-
 const cols=r.querySelectorAll("td");
-
 result.push({
 month: cols[0].innerText,
 rate: cols[1].innerText
 });
-
 });
 
 return result;
@@ -50,7 +47,7 @@ await browser.close();
 
 res.json(data);
 
-}catch(e){
+} catch(e) {
 
 res.send(e.toString());
 
