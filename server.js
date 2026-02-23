@@ -22,7 +22,9 @@ args: [
 ...chromium.args,
 '--no-sandbox',
 '--disable-setuid-sandbox',
-'--disable-dev-shm-usage'
+'--disable-dev-shm-usage',
+'--disable-http2', // ⭐ QUAN TRỌNG
+'--disable-gpu'
 ],
 
 executablePath: await chromium.executablePath(),
@@ -33,9 +35,20 @@ headless: chromium.headless,
 
 const page = await browser.newPage();
 
+// ⭐ giả lập browser thật
+await page.setUserAgent(
+"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120 Safari/537.36"
+);
+
+await page.setExtraHTTPHeaders({
+
+"accept-language": "vi-VN,vi;q=0.9,en-US;q=0.8,en;q=0.7"
+
+});
+
 await page.goto(
 "https://www.vietcombank.com.vn/vi-VN/KHCN/Cong-cu-Tien-ich/KHCN---Lai-suat",
-{ waitUntil: "networkidle2", timeout: 60000 }
+{ waitUntil: "domcontentloaded", timeout: 120000 }
 );
 
 await page.waitForSelector("table");
