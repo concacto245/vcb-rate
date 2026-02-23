@@ -1,23 +1,33 @@
-console.log("SERVER.JS LOADED");
+console.log("SERVER START");
+
 const express = require("express");
 const puppeteer = require("puppeteer-core");
 const chromium = require("@sparticuz/chromium");
 
 const app = express();
 
-app.get("/", (req, res) => {
-  res.send("VCB API running");
+app.get("/", (req,res)=>{
+
+res.send("OK");
+
 });
 
-app.get("/vcb", async (req, res) => {
+app.get("/vcb", async (req,res)=>{
 
-try {
+try{
 
 const browser = await puppeteer.launch({
 
-args: chromium.args,
+args: [
+...chromium.args,
+'--no-sandbox',
+'--disable-setuid-sandbox',
+'--disable-dev-shm-usage'
+],
+
 executablePath: await chromium.executablePath(),
-headless: true
+
+headless: chromium.headless,
 
 });
 
@@ -28,26 +38,23 @@ await page.goto(
 { waitUntil: "networkidle2", timeout: 60000 }
 );
 
-await page.waitForSelector("table", { timeout: 60000 });
+await page.waitForSelector("table");
 
-const data = await page.evaluate(() => {
+const data = await page.evaluate(()=>{
 
-const rows = document.querySelectorAll("table tbody tr");
+return Array.from(document.querySelectorAll("table tbody tr"))
+.map(r=>{
 
-let result = [];
+const t=r.querySelectorAll("td");
 
-rows.forEach(r => {
+return {
 
-const cols = r.querySelectorAll("td");
+month:t[0]?.innerText,
+rate:t[1]?.innerText
 
-result.push({
-month: cols[0]?.innerText,
-rate: cols[1]?.innerText
+};
+
 });
-
-});
-
-return result;
 
 });
 
@@ -55,14 +62,14 @@ await browser.close();
 
 res.json(data);
 
-} catch(e) {
+}catch(e){
 
-res.send(e.toString());
+res.status(500).send(e.toString());
 
 }
 
 });
 
-const PORT = process.env.PORT || 3000;
+const PORT=process.env.PORT||3000;
 
-app.listen(PORT, () => console.log("running"));
+app.listen(PORT,()=>console.log("RUNNING"));
