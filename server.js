@@ -3,10 +3,17 @@ const puppeteer = require("puppeteer");
 
 const app = express();
 
+app.get("/", (req,res)=>{
+res.send("VCB API is running");
+});
+
 app.get("/vcb", async (req, res) => {
 
+try{
+
 const browser = await puppeteer.launch({
-args: ['--no-sandbox','--disable-setuid-sandbox']
+args: ['--no-sandbox','--disable-setuid-sandbox'],
+headless: "new"
 });
 
 const page = await browser.newPage();
@@ -43,6 +50,14 @@ await browser.close();
 
 res.json(data);
 
+}catch(e){
+
+res.send(e.toString());
+
+}
+
 });
 
-app.listen(3000);
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, ()=>console.log("running"));
